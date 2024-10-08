@@ -106,6 +106,15 @@ resource "aws_instance" "my_instance" {
   security_groups = [aws_security_group.ec2_sg.name]
   key_name      = "your-key-name"  # Replace with your SSH key name
 
+# User data script to mount EFS on boot
+  user_data = <<-EOF
+              #!/bin/bash
+              yum install -y amazon-efs-utils
+              mkdir -p /data/test
+              mount -t efs ${aws_efs_file_system.my_efs.id}:/ /data/test
+              echo "${aws_efs_file_system.my_efs.id}:/ /data/test efs defaults,_netdev 0 0" >> /etc/fstab
+              EOF
+
   tags = {
     Name = "my-instance"
   }
